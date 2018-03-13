@@ -19,24 +19,28 @@ class FirebaseAPIClient {
         usersRef.updateChildValues(childUpdates)
     }
     
-    static func createNewPost(id: String?, person: String, eventName: String, date: String, description: String, location: String, withBlock: @escaping (String) -> ()) {
-        let ref = Database.database().reference()
-        let key = ref.child("Posts").childByAutoId().key
-        let post = ["Person": person, "Event": eventName, "RSVP": 0, "Date": date, "Description": description, "Location" : location] as [String : Any]
-        let childUpdates = ["/Posts/\(key)": post]
-        ref.updateChildValues(childUpdates)
-        withBlock(key)
-        
-        let otherChanges = [key : ""] as [String : String]
-        let moreChildUpdates = ["/Users/" + id! + "/Interested": otherChanges]
-        ref.updateChildValues(moreChildUpdates)
+    static func createNewPost(id: String?, person: String, eventName: String, date: String, description: String, location: String) -> Promise<String> {
+        return Promise { fulfill, reject in
+            let ref = Database.database().reference()
+            let key = ref.child("Posts").childByAutoId().key
+            let post = ["Person": person, "Event": eventName, "RSVP": 0, "Date": date, "Description": description, "Location" : location] as [String : Any]
+            let childUpdates = ["/Posts/\(key)": post]
+            ref.updateChildValues(childUpdates)
+            fulfill(key)
+            let otherChanges = [key : ""] as [String : String]
+            let moreChildUpdates = ["/Users/" + id! + "/Interested": otherChanges]
+            ref.updateChildValues(moreChildUpdates)
+        }
     }
     
-    static func createNewInterested(user: UserModel, postID: String){
-        let ref = Database.database().reference()
-        let key = ref.child("Interested").childByAutoId().key
-        //fix.
-        ref.child("Interested").updateChildValues([postID : [user.id! : user.name!]])
+    static func createNewInterested(user: UserModel, postID: String) -> Promise<String> {
+        return Promise {
+            fulfill, reject in
+            let ref = Database.database().reference()
+            let key = ref.child("Interested").childByAutoId().key
+            ref.child("Interested").updateChildValues([postID : [user.id! : user.name!]])
+            fulfill(key)
+        }
     }
     
     

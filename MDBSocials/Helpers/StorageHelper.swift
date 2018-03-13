@@ -8,17 +8,25 @@
 
 import Firebase
 import FirebaseStorage
+import PromiseKit
 
 class StorageHelper {
     
-    static func uploadMedia(postID: String, image: UIImage) {
-        let storage = Storage.storage().reference().child(postID)
-        if let uploadData = UIImageJPEGRepresentation(image, 0.3) {
-            storage.putData(uploadData, metadata: nil) { (metadata, error) in
-                if error != nil {
-                    print("error")
+    static func uploadMedia(postID: String, image: UIImage) -> Promise<Void> {
+        return Promise {
+            fulfill, reject in
+            
+            let storage = Storage.storage().reference().child(postID)
+            if let uploadData = UIImageJPEGRepresentation(image, 0.3) {
+                storage.putData(uploadData, metadata: nil) { (metadata, error) in
+                    if error != nil {
+                        reject(error!)
+                    } else {
+                        fulfill(())
+                    }
                 }
             }
+            
         }
         
     }

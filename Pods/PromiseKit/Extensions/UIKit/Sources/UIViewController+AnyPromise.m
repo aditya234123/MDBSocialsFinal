@@ -42,7 +42,7 @@
         promise = [[AnyPromise alloc] initWithResolver:&resolve];
         [vc setValue:^(NSInteger result){
             if (result == 0) {
-                resolve([NSError errorWithDomain:NSCocoaErrorDomain code:NSUserCancelledError userInfo:nil]);
+                resolve([NSError cancelledError]);
             } else {
                 resolve(@(result));
             }
@@ -78,7 +78,7 @@
 
     [self presentViewController:vc2present animated:animated completion:block];
 
-    promise.ensure(^{
+    promise.always(^{
         [vc2present.presentingViewController dismissViewControllerAnimated:animated completion:nil];
     });
 
@@ -104,7 +104,7 @@
     if (error != nil) {
         resolve(error);
     } else if (result == 0) {
-        resolve([NSError errorWithDomain:NSCocoaErrorDomain code:NSUserCancelledError userInfo:nil]);
+        resolve([NSError cancelledError]);
     } else {
         resolve(@(result));
     }
@@ -131,7 +131,7 @@
 }
 
 - (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker {
-    resolve([NSError errorWithDomain:NSCocoaErrorDomain code:NSUserCancelledError userInfo:nil]);
+    resolve([NSError cancelledError]);
     retainCycle = nil;
 }
 

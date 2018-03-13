@@ -56,18 +56,6 @@ class FeedViewController: UIViewController {
     func getPosts() {
         
         FirebaseAPIClient.fetchPosts { (post) in
-            /*
-            if self.firstPost.count == 0 {
-                self.firstPost.append(post)
-            } else {
-                let temp = self.firstPost[0]
-                self.firstPost[0] = post
-                self.restofPosts.append(temp)
-                self.restofPosts.sort(by: { (x, y) -> Bool in
-                    return x.date! < y.date!
-                })
-            }
-             */
             let currentDate = Date.init()
             let dateFormatter = DateFormatter()
             dateFormatter.dateStyle = DateFormatter.Style.medium

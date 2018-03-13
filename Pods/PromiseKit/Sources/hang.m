@@ -15,7 +15,7 @@ id PMKHang(AnyPromise *promise) {
         CFRunLoopSourceRef runLoopSource = CFRunLoopSourceCreate(NULL, 0, &context);
         CFRunLoopAddSource(runLoop, runLoopSource, kCFRunLoopDefaultMode);
 
-        promise.ensure(^{
+        promise.always(^{
             CFRunLoopStop(runLoop);
         });
         while (promise.pending) {

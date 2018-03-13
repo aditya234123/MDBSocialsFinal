@@ -15,7 +15,8 @@ target 'MDBSocials' do
     pod 'Alamofire', '~> 4.6'
     pod 'SwiftyJSON'
     pod 'ObjectMapper', '~> 3.1'
-    pod "PromiseKit", "~> 6.0"
+    pod "PromiseKit", "~> 4.0"
+
 
   target 'MDBSocialsTests' do
     inherit! :search_paths

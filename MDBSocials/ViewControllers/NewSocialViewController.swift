@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import PromiseKit
 
 class NewSocialViewController: UIViewController {
     
@@ -55,6 +56,7 @@ class NewSocialViewController: UIViewController {
     
     @objc func postSelected() {
         
+        
         if self.nameTextField.text == "" || self.descriptionField.text == "" || self.dateTextField.text == "" || self.imageView.image == nil || self.locationTextField.text == "" {
             let alert = UIAlertController(title: "Can't Post", message: "Please don't leave any fields blank", preferredStyle: .alert)
             let action = UIAlertAction(title: "OK", style: .default, handler: nil)
@@ -63,13 +65,20 @@ class NewSocialViewController: UIViewController {
             return
         }
         
+        let name = self.nameTextField.text!
+        let date = self.dateTextField.text!
+        let description = self.descriptionField.text!
+        let location = self.locationTextField.text!
         
-        FirebaseAPIClient.createNewPost(id: currentUser?.id, person: (currentUser?.name)!, eventName: self.nameTextField.text!, date: self.dateTextField.text!, description: self.descriptionField.text!, location: self.locationTextField.text!, withBlock: { (key) in
-            StorageHelper.uploadMedia(postID: key, image: self.imageView.image!)
+        
+        FirebaseAPIClient.createNewPost(id: currentUser?.id, person: (currentUser?.name)!, eventName: name, date: date, description: description, location: location).then
+            { key in
             FirebaseAPIClient.createNewInterested(user: self.currentUser!, postID: key)
-        })
-        
-        self.navigationController?.popViewController(animated: true)
+        }.then { key in
+            StorageHelper.uploadMedia(postID: key, image: self.imageView.image!)
+        }.then { _ -> Void in
+            self.navigationController?.popViewController(animated: true)
+        }
     }
     
     func setUpScrollView() {

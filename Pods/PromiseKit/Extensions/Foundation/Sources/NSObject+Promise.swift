@@ -1,5 +1,5 @@
 import Foundation
-#if !PMKCocoaPods
+#if !COCOAPODS
 import PromiseKit
 #endif
 
@@ -24,8 +24,17 @@ extension NSObject {
       - Warning: *Important* The promise must not outlive the object under observation.
       - SeeAlso: Apple’s KVO documentation.
     */
-    public func observe(_: PMKNamespacer, keyPath: String) -> Guarantee<Any?> {
-        return Guarantee { KVOProxy(observee: self, keyPath: keyPath, resolve: $0) }
+    public func observe<T>(keyPath: String) -> Promise<T> {
+        let (promise, fulfill, reject) = Promise<T>.pending()
+        let proxy = KVOProxy(observee: self, keyPath: keyPath) { obj in
+            if let obj = obj as? T {
+                fulfill(obj)
+            } else {
+                reject(PMKError.castError(T.self))
+            }
+        }
+        proxy.retainCycle = proxy
+        return promise
     }
 }
 
@@ -33,12 +42,10 @@ private class KVOProxy: NSObject {
     var retainCycle: KVOProxy?
     let fulfill: (Any?) -> Void
 
-    @discardableResult
     init(observee: NSObject, keyPath: String, resolve: @escaping (Any?) -> Void) {
         fulfill = resolve
         super.init()
         observee.addObserver(self, forKeyPath: keyPath, options: NSKeyValueObservingOptions.new, context: pointer)
-        retainCycle = self
     }
 
     fileprivate override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {

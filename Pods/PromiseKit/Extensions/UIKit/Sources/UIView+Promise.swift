@@ -1,5 +1,5 @@
 import UIKit.UIView
-#if !PMKCocoaPods
+#if !COCOAPODS
 import PromiseKit
 #endif
 
@@ -18,7 +18,7 @@ import PromiseKit
 
     import PromiseKit
 */
-public extension UIView {
+extension UIView {
     /**
      Animate changes to one or more views using the specified duration, delay,
      options, and completion handler.
@@ -40,23 +40,7 @@ public extension UIView {
      - Returns: A promise that fulfills with a boolean NSNumber indicating
      whether or not the animations actually finished.
     */
-    static func animate(_: PMKNamespacer, duration: TimeInterval, delay: TimeInterval = 0, options: UIViewAnimationOptions = [], animations: @escaping () -> Void) -> Guarantee<Bool> {
-        return Guarantee { animate(withDuration: duration, delay: delay, options: options, animations: animations, completion: $0) }
-    }
-
-    static func animate(_: PMKNamespacer, duration: TimeInterval, delay: TimeInterval, usingSpringWithDamping damping: CGFloat, initialSpringVelocity: CGFloat, options: UIViewAnimationOptions = [], animations: @escaping () -> Void) -> Guarantee<Bool> {
-        return Guarantee { animate(withDuration: duration, delay: delay, usingSpringWithDamping: damping, initialSpringVelocity: initialSpringVelocity, options: options, animations: animations, completion: $0) }
-    }
-    
-    static func transition(_: PMKNamespacer, with view: UIView, duration: TimeInterval, options: UIViewAnimationOptions = [], animations: (() -> Void)?) -> Guarantee<Bool> {
-        return Guarantee { transition(with: view, duration: duration, options: options, animations: animations, completion: $0) }
-    }
-               
-    static func transition(_: PMKNamespacer, from: UIView, to: UIView, duration: TimeInterval, options: UIViewAnimationOptions = []) -> Guarantee<Bool> {
-        return Guarantee { transition(from: from, to: to, duration: duration, options: options, completion: $0) }
-    }
-
-    static func perform(_: PMKNamespacer, animation: UISystemAnimation, on views: [UIView], options: UIViewAnimationOptions = [], animations: (() -> Void)?) -> Guarantee<Bool> {
-        return Guarantee { perform(animation, on: views, options: options, animations: animations, completion: $0) }
+    public class func promise(animateWithDuration duration: TimeInterval, delay: TimeInterval = 0, options: UIViewAnimationOptions = [], animations: @escaping () -> Void) -> Promise<Bool> {
+        return PromiseKit.wrap { animate(withDuration: duration, delay: delay, options: options, animations: animations, completion: $0) }
     }
 }
