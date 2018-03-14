@@ -14,6 +14,7 @@ class InterestedListView: UIView {
     var postID: String?
     var names = [String]()
     var nameToID = [String : String]()
+    var nameids = [String]()
 
     init(frame: CGRect, id: String) {
         super.init(frame: frame)
@@ -30,11 +31,13 @@ class InterestedListView: UIView {
     }
 
     func fetchInterested() {
-        FirebaseAPIClient.fetchInterested(postID: self.postID!).then { (arr) -> Void in
-            let name = arr[1]
-            let userID = arr[0]
-            self.names.append(name)
-            self.nameToID[name] = userID
+        FirebaseAPIClient.fetchInterested(postID: self.postID!, names: true).then { (arr) in
+            self.names = arr
+        }.then {
+            FirebaseAPIClient.fetchInterested(postID: self.postID!, names: false)
+        }.then { arr -> Void in
+            self.nameids = arr
+        }.then {
             self.tableView.reloadData()
         }
     }
@@ -61,7 +64,7 @@ extension InterestedListView: UITableViewDelegate, UITableViewDataSource {
         cell.awakeFromNib()
         cell.name.text = names[indexPath.row]
         
-        StorageHelper.getProfilePic(id: nameToID[names[indexPath.row]]!).then { (image) in
+        StorageHelper.getProfilePic(id: nameids[indexPath.row]).then { (image) in
             DispatchQueue.main.async {
                 cell.profilePic.image  = image
                 cell.setNeedsLayout()

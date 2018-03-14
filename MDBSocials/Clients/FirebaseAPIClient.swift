@@ -94,7 +94,7 @@ class FirebaseAPIClient {
         }
     }
     
-    static func fetchInterested(postID: String) -> Promise<[String]> {
+    static func fetchInterested(postID: String, names: Bool) -> Promise<[String]> {
         return Promise {
             fulfill, reject in
             let ref = Database.database().reference()
@@ -102,7 +102,11 @@ class FirebaseAPIClient {
                 var ids = [String]()
                 for child in snapshot.children {
                     let snap = child as! DataSnapshot
-                    ids.append(snap.key)
+                    if !names {
+                        ids.append(snap.key)
+                    } else {
+                        ids.append(snap.value as! String)
+                    }
                 }
                 fulfill(ids)
             })

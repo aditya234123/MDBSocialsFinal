@@ -82,7 +82,6 @@ class FeedViewCell: UICollectionViewCell {
     }
     
     @objc func labelTapped() {
-        
         delegate?.addModalView(id: self.id!)
     }
     

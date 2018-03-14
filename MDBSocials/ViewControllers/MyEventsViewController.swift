@@ -136,6 +136,8 @@ extension MyEventsViewController: UICollectionViewDelegate, UICollectionViewData
             x.removeFromSuperview()
         }
         cell.awakeFromNib()
+        cell.delegate = self
+        
         let post = interestedPosts[indexPath.item]
         
         let request = MKLocalSearchRequest()
@@ -165,7 +167,7 @@ extension MyEventsViewController: UICollectionViewDelegate, UICollectionViewData
             print("comes 1")
             }.then { _ -> Promise<[String]> in
                 print("comes 2")
-                return FirebaseAPIClient.fetchInterested(postID: post.id!)
+                return FirebaseAPIClient.fetchInterested(postID: post.id!, names: false)
             }.then { arr -> Promise<Int> in
                 print("comes 3")
                 if arr.contains((self.currentUser?.id)!) {
@@ -255,5 +257,17 @@ extension MyEventsViewController: UICollectionViewDelegate, UICollectionViewData
         destVC.starImage.hero.id = starHero
     }
 
+}
+
+extension MyEventsViewController: feedViewCellDelegate {
+    func addModalView(id: String) {
+        let list = InterestedListView(frame: CGRect(x: 50, y: 50, width: view.frame.width - 100, height: view.frame.height - 100), id: id)
+        let modalView = AKModalView(view: list)
+        modalView.dismissAnimation = .FadeOut
+        self.navigationController?.view.addSubview(modalView)
+        modalView.show()
+    }
+    
+    
 }
 

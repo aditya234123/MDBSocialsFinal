@@ -217,7 +217,7 @@ extension FeedViewController: UICollectionViewDelegate, UICollectionViewDataSour
             print("comes 1")
             }.then { _ -> Promise<[String]> in
                  print("comes 2")
-                return FirebaseAPIClient.fetchInterested(postID: post.id!)
+                return FirebaseAPIClient.fetchInterested(postID: post.id!, names: false)
             }.then { arr -> Promise<Int> in
                 print("comes 3")
                 print(arr)
