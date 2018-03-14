@@ -81,7 +81,15 @@ class FeedViewController: UIViewController {
                 FirebaseAPIClient.fetchNewPosts(withBlock: { (p) in
                     if (!self.postIDs.contains(p.id!)) {
                         print("Getting new post")
+                        let dateFormatter = DateFormatter()
+                        dateFormatter.dateStyle = DateFormatter.Style.medium
+                        dateFormatter.timeStyle = DateFormatter.Style.short
                         self.posts.append(p)
+                        self.posts.sort(by: { (x, y) -> Bool in
+                            let xDate = dateFormatter.date(from: x.date!)
+                            let yDate = dateFormatter.date(from: y.date!)
+                            return xDate! < yDate!
+                        })
                         self.collectionView.reloadData()
                     }
                 })

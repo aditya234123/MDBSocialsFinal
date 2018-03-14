@@ -71,6 +71,14 @@ class MyEventsViewController: UIViewController {
                         FirebaseAPIClient.getPostInfo(postID: id, withBlock: { (post) in
                             self.interestedPosts.append(post)
                             self.interestedPostIDs.append(post.id!)
+                            let dateFormatter = DateFormatter()
+                            dateFormatter.dateStyle = DateFormatter.Style.medium
+                            dateFormatter.timeStyle = DateFormatter.Style.short
+                            self.interestedPosts.sort(by: { (x, y) -> Bool in
+                                let xDate = dateFormatter.date(from: x.date!)
+                                let yDate = dateFormatter.date(from: y.date!)
+                                return xDate! < yDate!
+                            })
                             self.collectionView.reloadData()
                         })
                     }
