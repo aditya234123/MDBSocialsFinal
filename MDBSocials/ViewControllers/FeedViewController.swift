@@ -201,6 +201,8 @@ extension FeedViewController: UICollectionViewDelegate, UICollectionViewDataSour
             epochTime = (date?.timeIntervalSince1970)!
         }
         
+        var weatherIconImage: UIImage?
+        
         cell.id = post.id
         StorageHelper.getProfilePic(id: post.id!).then { (image) -> Void in
             post.image = image
@@ -221,6 +223,8 @@ extension FeedViewController: UICollectionViewDelegate, UICollectionViewDataSour
                 DarkSkyAPIHelper.findForecast(lat: lat, lon: lon, time: epochTime)
         }.then { (type) -> Void in
             print(type)
+            cell.bgClearIcon.alpha = 0.3
+            cell.bgClearIcon.image = nil
             
             var img = UIImage()
             if type == "snow" || type == "sleet" || type == "hail" {
@@ -239,7 +243,7 @@ extension FeedViewController: UICollectionViewDelegate, UICollectionViewDataSour
                 //rain
                 img = UIImage(named: "rain")!
             }
-            cell.bgClearIcon.image = img
+            weatherIconImage = img
             }.always {
                  print("comes 5")
                 DispatchQueue.main.async {
@@ -255,6 +259,7 @@ extension FeedViewController: UICollectionViewDelegate, UICollectionViewDataSour
                         cell.starImageView.image = image
                     }
                     cell.image.image = post.image
+                    cell.bgClearIcon.image = weatherIconImage
                     cell.setNeedsLayout()
                     cell.image.hero.id = "image" + "\(indexPath.item)"
                     cell.nameLabel.hero.id = "name" + "\(indexPath.item)"
