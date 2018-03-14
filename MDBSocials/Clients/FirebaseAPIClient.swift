@@ -118,6 +118,16 @@ class FirebaseAPIClient {
         }
     }
     
+    static func fetchRSVPChange(postID: String) -> Promise<Int> {
+        return Promise {
+            fulfill, reject in
+            let ref = Database.database().reference()
+            ref.child("Posts").child(postID).observe(.childChanged, with: { (snapshot) in
+                fulfill(snapshot.value as! Int)
+            })
+        }
+    }
+    
     static func eventRSVP(postID: String, user: UserModel) {
         let ref = Database.database().reference()
         ref.child("Posts").child(postID).runTransactionBlock({ (currentData:MutableData) -> TransactionResult in

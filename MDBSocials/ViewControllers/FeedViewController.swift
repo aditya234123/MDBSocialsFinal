@@ -270,6 +270,16 @@ extension FeedViewController: UICollectionViewDelegate, UICollectionViewDataSour
                     cell.RSVP.hero.id = "RSVP" + "\(indexPath.item)"
                     cell.starImageView.hero.id = "star" + "\(indexPath.item)"
                 }
+            }.then {
+                FirebaseAPIClient.fetchRSVPChange(postID: post.id!)
+            }.then { num -> Void in
+                DispatchQueue.main.async {
+                    post.RSVP = num
+                    cell.RSVP.setTitle("\(post.RSVP!)", for: .normal)
+                    post.userInterested = true
+                    let image = UIImage(named: "star2")
+                    cell.starImageView.image = image
+                }
             }
             return cell
         }
