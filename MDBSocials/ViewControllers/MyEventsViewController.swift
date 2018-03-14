@@ -43,20 +43,29 @@ class MyEventsViewController: UIViewController {
     }
     
     func getMyInterestedPosts() {
-        FirebaseAPIClient.getUserInterests(userID: (currentUser?.id!)!) { (postID) in
-            FirebaseAPIClient.getPostInfo(postID: postID, withBlock: { (post) in
-                self.interestedPosts.append(post)
-                DispatchQueue.main.async {
-                    self.collectionView.reloadData()
-                }
+        FirebaseAPIClient.getUserInterests(userID: (currentUser?.id!)!).then { (ids) -> Void in
+            
+            let group = DispatchGroup()
+            //go thru all ids and get post info for em
+            for id in ids {
+                group.enter()
+                FirebaseAPIClient.getPostInfo(postID: id, withBlock: { (post) in
+                    self.interestedPosts.append(post)
+                    group.leave()
+                })
+            }
+            
+            group.notify(queue: .main, execute: {
+                self.collectionView.reloadData()
             })
-        }// can add promises.
+            
+        }
     }
     
     
     func setUpCollectionView() {
         let layout = UICollectionViewFlowLayout()
-        layout.sectionInset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
+        layout.sectionInset = UIEdgeInsets(top: 10, left: 10, bottom: 100, right: 10)
         layout.minimumLineSpacing = 10
         collectionView = UICollectionView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: view.frame.height - (self.navigationController?.navigationBar.frame.height)!), collectionViewLayout: layout)
         collectionView.backgroundColor = UIColor(red: 29/255, green: 209/255, blue: 161/255, alpha: 1.0)

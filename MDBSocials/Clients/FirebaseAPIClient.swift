@@ -26,10 +26,10 @@ class FirebaseAPIClient {
             let post = ["Person": person, "Event": eventName, "RSVP": 1, "Date": date, "Description": description, "Location" : location] as [String : Any]
             let childUpdates = ["/Posts/\(key)": post]
             ref.updateChildValues(childUpdates)
-            fulfill(key)
-            let otherChanges = [key : ""] as [String : String]
-            let moreChildUpdates = ["/Users/" + id! + "/Interested": otherChanges]
+            let otherChanges = [""] as [String]
+            let moreChildUpdates = ["/Users/" + id! + "/Interested/" + "\(key)": otherChanges]
             ref.updateChildValues(moreChildUpdates)
+            fulfill(key)
         }
     }
     
@@ -37,7 +37,6 @@ class FirebaseAPIClient {
         return Promise {
             fulfill, reject in
             let ref = Database.database().reference()
-            let key = ref.child("Interested").childByAutoId().key
             ref.child("Interested").updateChildValues([postID : [user.id! : user.name!]])
             fulfill(postID)
         }
@@ -119,18 +118,25 @@ class FirebaseAPIClient {
             return TransactionResult.abort()
         })
         ref.child("Interested").child(postID).setValue([user.id! : user.name!])
-        let post = [postID : ""] as [String : String]
-        let childUpdates = ["/Users/"+user.id!+"/Interested": post]
-        ref.updateChildValues(childUpdates)
+        let otherChanges = [""] as [String]
+        let moreChildUpdates = ["/Users/" + user.id! + "/Interested/" + "\(postID)": otherChanges]
+        ref.updateChildValues(moreChildUpdates)
     }
     
     
-    static func getUserInterests(userID: String, withBlock: @escaping (String) -> ()) {
-        let ref = Database.database().reference().child("Users").child(userID).child("Interested")
-        ref.observe(.childAdded, with: { (snapshot) in
-            let id = snapshot.key as! String
-            withBlock(id)
-        })
+    static func getUserInterests(userID: String) -> Promise<[String]> {
+        return Promise {
+            fulfill, reject in
+            let ref = Database.database().reference().child("Users").child(userID).child("Interested")
+            ref.observeSingleEvent(of: .value) { (snapshot) in
+                var ids = [String]()
+                for child in snapshot.children {
+                    let snap = child as! DataSnapshot
+                    ids.append(snap.key)
+                }
+                fulfill(ids)
+            }
+        }
     }
     
     static func getPostInfo(postID: String, withBlock: @escaping (Post) -> ()) {
@@ -143,18 +149,5 @@ class FirebaseAPIClient {
         
         
     }
-
-    /* IMPLEMENT LATER
-    
-    static func fetchPostsAtOnce() -> Promise<[Post]> {
-        
-         let ref = Database.database().reference().child("Posts")
-        ref.observeSingleEvent(of: .value) { (snapshot) in
-            
-        }
-        
-    }
-    
-    */
     
 }
