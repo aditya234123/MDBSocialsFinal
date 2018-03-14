@@ -70,7 +70,7 @@
         <!--My Events-->
         <scene sceneID="Cb7-HY-m5V">
             <objects>
-                <viewController id="r0q-Jl-hky" customClass="MyEventsViewController" customModule="MDBSocials" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController hidesBottomBarWhenPushed="YES" id="r0q-Jl-hky" customClass="MyEventsViewController" customModule="MDBSocials" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="1RE-Kf-bbx">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -254,6 +254,6 @@
     <inferredMetricsTieBreakers>
         <segue reference="yVn-xr-U4m"/>
         <segue reference="tMn-wp-wgy"/>
-        <segue reference="Soo-Ja-pwY"/>
+        <segue reference="isN-y0-7cy"/>
     </inferredMetricsTieBreakers>
 </document>

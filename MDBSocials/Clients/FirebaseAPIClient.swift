@@ -97,12 +97,14 @@ class FirebaseAPIClient {
     static func fetchInterested(postID: String) -> Promise<[String]> {
         return Promise {
             fulfill, reject in
-            let ref = Database.database().reference().child("Interested").child(postID)
-            ref.observe(.childAdded, with: { (snapshot) in
-                let id = snapshot.key as! String
-                let name = snapshot.value as! String
-                let arr = [id, name]
-                fulfill(arr)
+            let ref = Database.database().reference()
+            ref.child("Interested").child(postID).observeSingleEvent(of: .value, with: { (snapshot) in
+                var ids = [String]()
+                for child in snapshot.children {
+                    let snap = child as! DataSnapshot
+                    ids.append(snap.key)
+                }
+                fulfill(ids)
             })
         }
     }
@@ -142,7 +144,7 @@ class FirebaseAPIClient {
             }
             return TransactionResult.abort()
         })
-        ref.child("Interested").child(postID).setValue([user.id! : user.name!])
+        ref.child("Interested").child(postID).child(user.id!).setValue(user.name!)
         let otherChanges = [""] as [String]
         let moreChildUpdates = ["/Users/" + user.id! + "/Interested/" + "\(postID)": otherChanges]
         ref.updateChildValues(moreChildUpdates)
@@ -173,7 +175,6 @@ class FirebaseAPIClient {
             let post = Post(map: Map.init(mappingType: .fromJSON, JSON: dict))
             withBlock(post!)
         }
-        
         
     }
     

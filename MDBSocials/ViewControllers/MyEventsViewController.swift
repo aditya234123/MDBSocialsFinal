@@ -28,6 +28,10 @@ class MyEventsViewController: UIViewController {
         setUpCollectionView()
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        self.tabBarController?.tabBar.isHidden = false
+    }
+    
     func getCurrentUserAndPosts() {
         UserAuthHelper.getCurrentUser().then { (user) in
         FirebaseAPIClient.fetchUser(id: user.uid).then {
@@ -164,7 +168,7 @@ extension MyEventsViewController: UICollectionViewDelegate, UICollectionViewData
                 return FirebaseAPIClient.fetchInterested(postID: post.id!)
             }.then { arr -> Promise<Int> in
                 print("comes 3")
-                if arr[0] == self.currentUser?.id {
+                if arr.contains((self.currentUser?.id)!) {
                     post.userInterested = true
                 }
                 return FirebaseAPIClient.fetchRSVP(postID: post.id!)
@@ -232,6 +236,7 @@ extension MyEventsViewController: UICollectionViewDelegate, UICollectionViewData
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        self.tabBarController?.tabBar.isHidden = true
         let destVC = segue.destination as! DetailViewController
         let imgHero = "image" + "\(selectedCell!)"
         let eventHero = "event" + "\(selectedCell!)"

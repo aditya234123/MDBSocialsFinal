@@ -220,7 +220,8 @@ extension FeedViewController: UICollectionViewDelegate, UICollectionViewDataSour
                 return FirebaseAPIClient.fetchInterested(postID: post.id!)
             }.then { arr -> Promise<Int> in
                 print("comes 3")
-                if arr[0] == self.currentUser?.id {
+                print(arr)
+                if arr.contains((self.currentUser?.id)!) {
                     post.userInterested = true
                 }
                 return FirebaseAPIClient.fetchRSVP(postID: post.id!)
