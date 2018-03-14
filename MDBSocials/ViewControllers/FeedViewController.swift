@@ -45,11 +45,8 @@ class FeedViewController: UIViewController {
     func getCurrentUser() {
         UserAuthHelper.getCurrentUser().then { (user) in
         FirebaseAPIClient.fetchUser(id: user.uid).then {
-            dict -> Void in
-                let name = dict["name"] as! String
-                let email = dict["email"] as! String
-                let username = dict["username"] as! String
-                self.currentUser = UserModel(name: name, username: username, email: email, id: user.uid)
+            u -> Void in
+                self.currentUser = u
             }
         }
     }

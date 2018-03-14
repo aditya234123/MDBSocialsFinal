@@ -7,30 +7,27 @@
 //
 
 import UIKit
-//import ObjectMapper
+import ObjectMapper
 
 class Post {
     
-    /* IMPLEMENT LATER
 
     required init?(map: Map) {
-        
+        mapping(map: map)
     }
     
     
     func mapping(map: Map) {
-        id <- map["id"]
-        personName <- map["personName"]
-        eventName <- map["personName"]
-        image <- map["image"]
+        id <- map["ID"]
+        personName <- map["Person"]
+        eventName <- map["Event"]
         RSVP <- map["RSVP"]
-        date <- map["date"]
-        description <- map["description"]
-        userInterested <- map["userInterested"]
-        location <- map["location"]
+        date <- map["Date"]
+        description <- map["Description"]
+        location <- map["Location"]
+        userInterested = false
     }
- 
-     */
+
 
     var id: String?
     var personName: String?
@@ -42,30 +39,5 @@ class Post {
     var userInterested: Bool?
     var location: String?
     var iconImg: UIImage?
-    
-    init(id: String, postDict: [String:Any?]?) {
-        self.id = id
-        if postDict != nil {
-            if let person = postDict!["Person"] as? String {
-                self.personName = person
-            }
-            if let event = postDict!["Event"] as? String {
-                self.eventName = event
-            }
-            if let description = postDict!["Description"] as? String {
-                self.description = description
-            }
-            if let date = postDict!["Date"] as? String {
-                self.date = date
-            }
-            if let RSVP = postDict!["RSVP"] as? Int {
-                self.RSVP = RSVP
-            }
-            if let location = postDict!["Location"] as? String {
-                self.location = location
-            }
-            userInterested = false
-        }
-    }
 
 }

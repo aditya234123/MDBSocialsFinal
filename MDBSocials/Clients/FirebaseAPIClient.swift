@@ -9,6 +9,7 @@
 import Firebase
 import FirebaseDatabase
 import PromiseKit
+import ObjectMapper
 
 class FirebaseAPIClient {
 
@@ -43,13 +44,15 @@ class FirebaseAPIClient {
     }
     
     
-    static func fetchUser(id: String)  -> Promise<NSDictionary> {
+    static func fetchUser(id: String)  -> Promise<UserModel> {
         return Promise {
             fulfill, reject in
             let ref = Database.database().reference()
             ref.child("Users").child(id).observeSingleEvent(of: .value, with: { (snapshot) in
-                let dict = snapshot.value as? NSDictionary
-                fulfill(dict!)
+                var dict = snapshot.value as! [String : Any]
+                dict["ID"] = id
+                let user = UserModel(map: Map.init(mappingType: .fromJSON, JSON: dict))
+                fulfill(user!)
             })
         }
     }
@@ -62,8 +65,11 @@ class FirebaseAPIClient {
                 var posts = [Post]()
                 for snap in snapshot.children {
                     let snapConverted = snap as! DataSnapshot
-                    let post = Post(id: snapConverted.key , postDict: snapConverted.value as! [String : Any]?)
-                    posts.append(post)
+                    var dict = snapConverted.value as! [String : Any]
+                    dict["ID"] = snapConverted.key
+                    let post = Post(map: Map.init(mappingType: .fromJSON, JSON: dict))
+                    //let post = Post(id: snapConverted.key , postDict: snapConverted.value as! [String : Any]?)
+                    posts.append(post!)
                 }
                 fulfill(posts)
             })
@@ -74,8 +80,10 @@ class FirebaseAPIClient {
     static func fetchNewPosts(withBlock: @escaping (Post) -> ()) {
         let ref = Database.database().reference()
         ref.child("Posts").observe(.childAdded) { (snapshot) in
-            let post = Post(id: snapshot.key , postDict: snapshot.value as! [String : Any]?)
-            withBlock(post)
+            var dict = snapshot.value as! [String : Any]
+            dict["ID"] = snapshot.key
+            let post = Post(map: Map.init(mappingType: .fromJSON, JSON: dict))
+            withBlock(post!)
         }
     }
     
@@ -150,8 +158,10 @@ class FirebaseAPIClient {
         
         let ref = Database.database().reference().child("Posts")
         ref.child(postID).observeSingleEvent(of: .value) { (snapshot) in
-            let post = Post(id: snapshot.key, postDict: snapshot.value as! [String : Any]?)
-            withBlock(post)
+            var dict = snapshot.value as! [String : Any]
+            dict["ID"] = snapshot.key
+            let post = Post(map: Map.init(mappingType: .fromJSON, JSON: dict))
+            withBlock(post!)
         }
         
         

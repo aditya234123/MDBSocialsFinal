@@ -7,19 +7,25 @@
 //
 
 import UIKit
+import ObjectMapper
 
-class UserModel {
+class UserModel: Mappable {
+    
+    required init?(map: Map) {
+        mapping(map: map)
+    }
+    
+    func mapping(map: Map) {
+        id <- map["ID"]
+        name <- map["name"]
+        username <- map["username"]
+        email <- map["email"]
+    }
+    
 
     var id: String?
     var name: String?
     var username: String?
     var email: String?
-    
-    init(name: String, username: String, email: String, id: String) {
-        self.name = name
-        self.username = username
-        self.email = email
-        self.id = id
-    }
     
 }
