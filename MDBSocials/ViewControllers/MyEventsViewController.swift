@@ -51,6 +51,7 @@ class MyEventsViewController: UIViewController {
                 group.enter()
                 FirebaseAPIClient.getPostInfo(postID: id, withBlock: { (post) in
                     self.interestedPosts.append(post)
+                    self.interestedPostIDs.append(post.id!)
                     group.leave()
                 })
             }
@@ -59,6 +60,16 @@ class MyEventsViewController: UIViewController {
                 self.collectionView.reloadData()
             })
             
+            }.then {
+                FirebaseAPIClient.fetchNewInterests(userID: (self.currentUser?.id)!, withBlock: { (id) in
+                    if !self.interestedPostIDs.contains(id) {
+                        FirebaseAPIClient.getPostInfo(postID: id, withBlock: { (post) in
+                            self.interestedPosts.append(post)
+                            self.interestedPostIDs.append(post.id!)
+                            self.collectionView.reloadData()
+                        })
+                    }
+                })
         }
     }
     

@@ -79,6 +79,13 @@ class FirebaseAPIClient {
         }
     }
     
+    static func fetchNewInterests(userID: String, withBlock: @escaping (String) -> ()) {
+        let ref = Database.database().reference()
+        ref.child("Users").child(userID).child("Interested").observe(.childAdded) { (snapshot) in
+            withBlock(snapshot.key)
+        }
+    }
+    
     static func fetchInterested(postID: String) -> Promise<[String]> {
         return Promise {
             fulfill, reject in
