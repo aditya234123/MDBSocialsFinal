@@ -54,6 +54,14 @@ class MyEventsViewController: UIViewController {
             }
             
             group.notify(queue: .main, execute: {
+                let dateFormatter = DateFormatter()
+                dateFormatter.dateStyle = DateFormatter.Style.medium
+                dateFormatter.timeStyle = DateFormatter.Style.short
+                self.interestedPosts.sort(by: { (x, y) -> Bool in
+                    let xDate = dateFormatter.date(from: x.date!)
+                    let yDate = dateFormatter.date(from: y.date!)
+                    return xDate! < yDate!
+                })
                 self.collectionView.reloadData()
             })
             

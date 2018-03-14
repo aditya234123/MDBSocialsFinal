@@ -66,7 +66,9 @@ class FeedViewController: UIViewController {
                     self.posts.append(post)
                     self.postIDs.append(post.id!)
                     self.posts.sort(by: { (x, y) -> Bool in
-                        return x.date! < y.date!
+                        let xDate = dateFormatter.date(from: x.date!)
+                        let yDate = dateFormatter.date(from: y.date!)
+                        return xDate! < yDate!
                     })
                 } else {
                     self.postIDs.append(post.id!)
