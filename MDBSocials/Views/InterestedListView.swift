@@ -31,7 +31,7 @@ class InterestedListView: UIView {
     }
 
     func fetchInterested() {
-        FirebaseAPIClient.fetchInterested(postID: self.postID!, names: true).then { (arr) in
+        FirebaseAPIClient.fetchInterested(postID: self.postID!, names: true).then { arr in
             self.names = arr
         }.then {
             FirebaseAPIClient.fetchInterested(postID: self.postID!, names: false)
@@ -64,7 +64,7 @@ extension InterestedListView: UITableViewDelegate, UITableViewDataSource {
         cell.awakeFromNib()
         cell.name.text = names[indexPath.row]
         
-        StorageHelper.getProfilePic(id: nameids[indexPath.row]).then { (image) in
+        StorageHelper.getProfilePic(id: nameids[indexPath.row]).then { image in
             DispatchQueue.main.async {
                 cell.profilePic.image  = image
                 cell.setNeedsLayout()
