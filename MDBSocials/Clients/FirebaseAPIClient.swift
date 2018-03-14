@@ -23,7 +23,7 @@ class FirebaseAPIClient {
         return Promise { fulfill, reject in
             let ref = Database.database().reference()
             let key = ref.child("Posts").childByAutoId().key
-            let post = ["Person": person, "Event": eventName, "RSVP": 0, "Date": date, "Description": description, "Location" : location] as [String : Any]
+            let post = ["Person": person, "Event": eventName, "RSVP": 1, "Date": date, "Description": description, "Location" : location] as [String : Any]
             let childUpdates = ["/Posts/\(key)": post]
             ref.updateChildValues(childUpdates)
             fulfill(key)
@@ -39,44 +39,69 @@ class FirebaseAPIClient {
             let ref = Database.database().reference()
             let key = ref.child("Interested").childByAutoId().key
             ref.child("Interested").updateChildValues([postID : [user.id! : user.name!]])
-            fulfill(key)
+            fulfill(postID)
         }
     }
     
     
-    static func fetchUser(id: String, withBlock: @escaping (NSDictionary) -> ()) {
-        let ref = Database.database().reference()
-        ref.child("Users").child(id).observeSingleEvent(of: .value, with: { (snapshot) in
-            let dict = snapshot.value as? NSDictionary
-            withBlock(dict!)
-            
-        })
+    static func fetchUser(id: String)  -> Promise<NSDictionary> {
+        return Promise {
+            fulfill, reject in
+            let ref = Database.database().reference()
+            ref.child("Users").child(id).observeSingleEvent(of: .value, with: { (snapshot) in
+                let dict = snapshot.value as? NSDictionary
+                fulfill(dict!)
+            })
+        }
     }
     
-    static func fetchPosts(withBlock: @escaping (Post) -> ()) {
+    static func fetchAllPosts() -> Promise<[Post]> {
+        return Promise {
+            fulfill, reject in
+            let ref = Database.database().reference()
+            ref.child("Posts").observeSingleEvent(of: .value, with: { (snapshot) in
+                var posts = [Post]()
+                for snap in snapshot.children {
+                    let snapConverted = snap as! DataSnapshot
+                    let post = Post(id: snapConverted.key , postDict: snapConverted.value as! [String : Any]?)
+                    posts.append(post)
+                }
+                fulfill(posts)
+            })
+           
+        }
+    }
+    
+    static func fetchNewPosts(withBlock: @escaping (Post) -> ()) {
         let ref = Database.database().reference()
-        ref.child("Posts").observe(.childAdded, with: { (snapshot) in
-            let post = Post(id: snapshot.key, postDict: snapshot.value as! [String : Any]?)
+        ref.child("Posts").observe(.childAdded) { (snapshot) in
+            let post = Post(id: snapshot.key , postDict: snapshot.value as! [String : Any]?)
             withBlock(post)
-        })
+        }
     }
     
-    static func fetchInterested(postID: String, withBlock: @escaping ([String]) -> ()) {
-
-        let ref = Database.database().reference().child("Interested").child(postID)
-        ref.observe(.childAdded, with: { (snapshot) in
-            let id = snapshot.key as! String
-            let name = snapshot.value as! String
-            let dict = [id, name]
-            withBlock(dict)
-        })
+    static func fetchInterested(postID: String) -> Promise<[String]> {
+        return Promise {
+            fulfill, reject in
+            let ref = Database.database().reference().child("Interested").child(postID)
+            ref.observe(.childAdded, with: { (snapshot) in
+                let id = snapshot.key as! String
+                let name = snapshot.value as! String
+                let arr = [id, name]
+                fulfill(arr)
+            })
+        }
     }
     
-    static func fetchRSVP(postID: String, withBlock: @escaping (Int) -> ()) {
-        let ref = Database.database().reference()
-        ref.child("Posts").child(postID).observe(.childChanged, with: { (snapshot) in
-            withBlock(snapshot.value as! Int)
-        })
+    static func fetchRSVP(postID: String) -> Promise<Int> {
+        return Promise {
+            fulfill, reject in
+            let ref = Database.database().reference()
+            ref.child("Posts").child(postID).observe(.value, with: { (snapshot) in
+                let dict = snapshot.value as! [String : Any]
+                fulfill(dict["RSVP"] as! Int)
+            })
+        }
     }
     
     static func eventRSVP(postID: String, user: UserModel) {

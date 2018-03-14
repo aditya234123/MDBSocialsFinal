@@ -8,6 +8,7 @@
 
 import Firebase
 import FirebaseAuthUI
+import PromiseKit
 
 class UserAuthHelper {
 
@@ -58,8 +59,11 @@ class UserAuthHelper {
         
     }
     
-    static func getCurrentUser(withBlock: @escaping (User) -> ()) {
-        withBlock(Auth.auth().currentUser!)
+    static func getCurrentUser() -> Promise<User> {
+        return Promise {
+            fulfill, reject in
+            fulfill(Auth.auth().currentUser!)
+        }
     }
     
     

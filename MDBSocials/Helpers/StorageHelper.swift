@@ -13,6 +13,7 @@ import PromiseKit
 class StorageHelper {
     
     static func uploadMedia(postID: String, image: UIImage) -> Promise<Void> {
+        
         return Promise {
             fulfill, reject in
             
@@ -31,18 +32,21 @@ class StorageHelper {
         
     }
     
-    static func getProfilePic(id: String, withBlock: @escaping (UIImage) -> ()) {
-        let ref = Storage.storage().reference().child(id)
-        ref.getData(maxSize: 1 * 4096 * 4096) { data, error in
-            if let error = error {
-                getProfilePic(id: id, withBlock: { (image) in
-                    withBlock(image)
-                })
-            } else {
-                let image = UIImage(data: data!)
-                withBlock(image!)
+    static func getProfilePic(id: String) -> Promise<UIImage> {
+        return Promise {
+            fulfill, reject in
+            
+            let ref = Storage.storage().reference().child(id)
+            ref.getData(maxSize: 1 * 4096 * 4096) { data, error in
+                if let error = error {
+                    reject(error)
+                } else {
+                    let image = UIImage(data: data!)
+                    fulfill(image!)
+                }
             }
         }
+        
     }
     
 }

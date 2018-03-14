@@ -10,15 +10,15 @@ import UIKit
 import Hero
 import MapKit
 import CoreLocation
+import PromiseKit
 
 class FeedViewController: UIViewController {
     
     var collectionView: UICollectionView!
     var selectedCell: Int?
     
-    var firstPost = [Post]()
-    var restofPosts = [Post]()
     var posts = [Post]()
+    var postIDs = [String]()
     var currentUser: UserModel?
     
     override func viewDidLoad() {
@@ -43,35 +43,53 @@ class FeedViewController: UIViewController {
     }
     
     func getCurrentUser() {
-        UserAuthHelper.getCurrentUser { (user) in
-            FirebaseAPIClient.fetchUser(id: user.uid, withBlock: { (dict) in
+        UserAuthHelper.getCurrentUser().then { (user) in
+        FirebaseAPIClient.fetchUser(id: user.uid).then {
+            dict -> Void in
                 let name = dict["name"] as! String
                 let email = dict["email"] as! String
                 let username = dict["username"] as! String
                 self.currentUser = UserModel(name: name, username: username, email: email, id: user.uid)
-            })
+            }
         }
     }
     
+    
     func getPosts() {
         
-        FirebaseAPIClient.fetchPosts { (post) in
+        FirebaseAPIClient.fetchAllPosts().then { posts -> Void in
             let currentDate = Date.init()
             let dateFormatter = DateFormatter()
             dateFormatter.dateStyle = DateFormatter.Style.medium
             dateFormatter.timeStyle = DateFormatter.Style.short
-            let currentDateStr = dateFormatter.string(from: currentDate)
-            if post.date! >= currentDateStr {
-            self.posts.append(post)
-            self.posts.sort(by: { (x, y) -> Bool in
-                return x.date! < y.date!
-            })
+            //let currentDateStr = dateFormatter.string(from: currentDate)
+            for post in posts {
+                let pDate = dateFormatter.date(from: post.date!)
+                if pDate! >= currentDate {
+                    self.posts.append(post)
+                    self.postIDs.append(post.id!)
+                    self.posts.sort(by: { (x, y) -> Bool in
+                        return x.date! < y.date!
+                    })
+                } else {
+                    self.postIDs.append(post.id!)
+                }
+            }
             DispatchQueue.main.async {
                 self.collectionView.reloadData()
             }
-            }
+            }.then { _ -> Void in
+                FirebaseAPIClient.fetchNewPosts(withBlock: { (p) in
+                    if (!self.postIDs.contains(p.id!)) {
+                        print("Getting new post")
+                        self.posts.append(p)
+                        self.collectionView.reloadData()
+                    }
+                })
         }
+        
     }
+    
     
     func setUpNavBar() {
         let barColor = UIColor(red: 29/255, green: 209/255, blue: 161/255, alpha: 1.0)
@@ -156,7 +174,7 @@ extension FeedViewController: UICollectionViewDelegate, UICollectionViewDataSour
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "feedCell", for: indexPath) as! FeedViewCell
-        for var x: UIView in cell.contentView.subviews {
+        for x in cell.contentView.subviews {
             x.removeFromSuperview()
         }
         cell.awakeFromNib()
@@ -166,118 +184,111 @@ extension FeedViewController: UICollectionViewDelegate, UICollectionViewDataSour
         let request = MKLocalSearchRequest()
         request.naturalLanguageQuery = post.location
         let search = MKLocalSearch(request: request)
+        var lat: Double = 0
+        var lon: Double = 0
+        var epochTime:TimeInterval = 0
         search.start { response, error in
             guard let response = response else {
                 print("There was an error searching for: \(request.naturalLanguageQuery) error: \(error)")
                 return
             }
             let first = response.mapItems[0]
-            let lat = first.placemark.coordinate.latitude
-            let lon = first.placemark.coordinate.longitude
+            lat = first.placemark.coordinate.latitude
+            lon = first.placemark.coordinate.longitude
             let dateFormatter = DateFormatter()
             dateFormatter.dateStyle = DateFormatter.Style.medium
             dateFormatter.timeStyle = DateFormatter.Style.short
             let date = dateFormatter.date(from: post.date!)
-            let epochTime = date?.timeIntervalSince1970
-            DarkSkyAPIHelper.findForecast(lat: lat, lon: lon, time: epochTime!, withBlock: { (type) in
-                print(type)
-                
-                var img = UIImage()
-                if type == "snow" || type == "sleet" || type == "hail" {
-                    //snow icon
-                    img = UIImage(named: "snow")!
-                }
-                else if type == "clear-day" || type == "clear-night" || type == "wind" || type == "fog" {
-                    //sun
-                    img = UIImage(named: "sun")!
-                }
-                else if type == "cloudy" || type == "partly-cloudy-day" || type == "partly-cloudy-night" {
-                    //cloud
-                    img = UIImage(named: "cloudy")!
-                }
-                else if type == "rain" || type == "thunderstorm" || type == "tornado" {
-                    //rain
-                    img = UIImage(named: "rain")!
-                }
-                
-                DispatchQueue.main.async {
-                    cell.bgClearIcon.image = img
-                    cell.setNeedsLayout()
-                }
-            })
-            
+            epochTime = (date?.timeIntervalSince1970)!
         }
-        
-        
-        
         
         cell.id = post.id
-        StorageHelper.getProfilePic(id: post.id!, withBlock: { (image) in
+        StorageHelper.getProfilePic(id: post.id!).then { (image) -> Void in
             post.image = image
-            DispatchQueue.main.async{
-                cell.image.image = self.posts[indexPath.item].image!
-                cell.setNeedsLayout()
+            print("comes 1")
+            }.then { _ -> Promise<[String]> in
+                 print("comes 2")
+                return FirebaseAPIClient.fetchInterested(postID: post.id!)
+            }.then { arr -> Promise<Int> in
+                print("comes 3")
+                if arr[0] == self.currentUser?.id {
+                    post.userInterested = true
+                }
+                return FirebaseAPIClient.fetchRSVP(postID: post.id!)
+            }.then { rsvpNum -> Void in
+                 print("comes 4")
+                post.RSVP = rsvpNum
+            }.then { _ -> Promise<String> in
+                DarkSkyAPIHelper.findForecast(lat: lat, lon: lon, time: epochTime)
+        }.then { (type) -> Void in
+            print(type)
+            
+            var img = UIImage()
+            if type == "snow" || type == "sleet" || type == "hail" {
+                //snow icon
+                img = UIImage(named: "snow")!
             }
-        })
-        
-        FirebaseAPIClient.fetchInterested(postID: post.id!) { (arr) in
-            if arr[0] == self.currentUser?.id {
-                post.userInterested = true
-                let image = UIImage(named: "star2")
+            else if type == "clear-day" || type == "clear-night" || type == "wind" || type == "fog" {
+                //sun
+                img = UIImage(named: "sun")!
+            }
+            else if type == "cloudy" || type == "partly-cloudy-day" || type == "partly-cloudy-night" {
+                //cloud
+                img = UIImage(named: "cloudy")!
+            }
+            else if type == "rain" || type == "thunderstorm" || type == "tornado" {
+                //rain
+                img = UIImage(named: "rain")!
+            }
+            cell.bgClearIcon.image = img
+            }.always {
+                 print("comes 5")
                 DispatchQueue.main.async {
-                    cell.starImageView.image = image
+                    cell.nameLabel.text = post.personName
+                    cell.eventLabel.text = post.eventName
+                    cell.RSVP.setTitle("\(post.RSVP!)", for: .normal)
+                    cell.date.text = post.date
+                    if post.userInterested! {
+                        let image = UIImage(named: "star2")
+                        cell.starImageView.image = image
+                    } else {
+                        let image = UIImage(named: "star")
+                        cell.starImageView.image = image
+                    }
+                    cell.image.image = post.image
                     cell.setNeedsLayout()
+                    cell.image.hero.id = "image" + "\(indexPath.item)"
+                    cell.nameLabel.hero.id = "name" + "\(indexPath.item)"
+                    cell.eventLabel.hero.id = "event" + "\(indexPath.item)"
+                    cell.date.hero.id = "date" + "\(indexPath.item)"
+                    cell.RSVP.hero.id = "RSVP" + "\(indexPath.item)"
+                    cell.starImageView.hero.id = "star" + "\(indexPath.item)"
                 }
             }
-        
-        }
-        FirebaseAPIClient.fetchRSVP(postID: post.id!) { (rsvpNum) in
-            cell.RSVP.setTitle("\(rsvpNum)", for: .normal)
-            post.RSVP = rsvpNum
-        }
-        cell.nameLabel.text = post.personName
-        cell.eventLabel.text = post.eventName
-        cell.RSVP.setTitle("\(post.RSVP!)", for: .normal)
-        cell.date.text = post.date
-        
-        if post.userInterested! {
-            let image = UIImage(named: "star2")
-            DispatchQueue.main.async {
-                cell.starImageView.image = image
-            }
+            return cell
         }
         
-        cell.image.hero.id = "image" + "\(indexPath.item)"
-        cell.nameLabel.hero.id = "name" + "\(indexPath.item)"
-        cell.eventLabel.hero.id = "event" + "\(indexPath.item)"
-        cell.date.hero.id = "date" + "\(indexPath.item)"
-        cell.RSVP.hero.id = "RSVP" + "\(indexPath.item)"
-        cell.starImageView.hero.id = "star" + "\(indexPath.item)"
+        func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+            let size = CGSize(width: view.frame.width - 20, height: 150)
+            return size
+        }
         
-        return cell
+        func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+            selectedCell = indexPath.item
+            self.performSegue(withIdentifier: "toDetail", sender: self)
+        }
+        
     }
     
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        let size = CGSize(width: view.frame.width - 20, height: 150)
-        return size
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        selectedCell = indexPath.item
-        self.performSegue(withIdentifier: "toDetail", sender: self)
-    }
-    
-}
-
-extension FeedViewController: feedViewCellDelegate {
-    
-    func addModalView(id: String) {
-        let list = InterestedListView(frame: CGRect(x: 50, y: 50, width: view.frame.width - 100, height: view.frame.height - 100), id: id)
-        let modalView = AKModalView(view: list)
-        modalView.dismissAnimation = .FadeOut
-        self.navigationController?.view.addSubview(modalView)
-        modalView.show()
-    }
-
+    extension FeedViewController: feedViewCellDelegate {
+        
+        func addModalView(id: String) {
+            let list = InterestedListView(frame: CGRect(x: 50, y: 50, width: view.frame.width - 100, height: view.frame.height - 100), id: id)
+            let modalView = AKModalView(view: list)
+            modalView.dismissAnimation = .FadeOut
+            self.navigationController?.view.addSubview(modalView)
+            modalView.show()
+        }
+        
 }
 

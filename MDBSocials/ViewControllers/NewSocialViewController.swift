@@ -74,8 +74,8 @@ class NewSocialViewController: UIViewController {
         FirebaseAPIClient.createNewPost(id: currentUser?.id, person: (currentUser?.name)!, eventName: name, date: date, description: description, location: location).then
             { key in
             FirebaseAPIClient.createNewInterested(user: self.currentUser!, postID: key)
-        }.then { key in
-            StorageHelper.uploadMedia(postID: key, image: self.imageView.image!)
+        }.then { key -> Promise<Void> in
+            return StorageHelper.uploadMedia(postID: key, image: self.imageView.image!)
         }.then { _ -> Void in
             self.navigationController?.popViewController(animated: true)
         }
