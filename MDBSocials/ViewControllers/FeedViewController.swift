@@ -223,8 +223,10 @@ extension FeedViewController: UICollectionViewDelegate, UICollectionViewDataSour
                 DarkSkyAPIHelper.findForecast(lat: lat, lon: lon, time: epochTime)
         }.then { (type) -> Void in
             print(type)
-            cell.bgClearIcon.alpha = 0.3
-            cell.bgClearIcon.image = nil
+            DispatchQueue.main.async {
+                cell.bgClearIcon.alpha = 0.3
+                cell.bgClearIcon.image = nil
+            }
             
             var img = UIImage()
             if type == "snow" || type == "sleet" || type == "hail" {

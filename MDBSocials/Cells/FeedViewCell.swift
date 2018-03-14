@@ -87,9 +87,8 @@ class FeedViewCell: UICollectionViewCell {
     }
     
     func setUpBG() {
-        
         bgClearIcon = UIImageView(frame: CGRect(x: contentView.frame.height + 60, y: 3, width: contentView.frame.width - (contentView.frame.height + 15) * 1.5, height: contentView.frame.width - (contentView.frame.height + 15) * 1.5))
-        bgClearIcon.alpha = 0.3
+        bgClearIcon.alpha = 0.2
         addSubview(bgClearIcon)
         
     }
