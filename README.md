@@ -23,7 +23,7 @@ Once you are logged in, you are brought to the feed. This is where users posts w
 Here you also notice that the cells have a weather icon in them. This represents how the weather will be at that time 
 for the event. The DarkSkyAPI was used to achieve this.
 
-![simulator screen shot - iphone 8 - 2018-03-03 at 22 38 44](https://user-images.githubusercontent.com/17814417/36942924-32efed26-1f34-11e8-9a42-8853ba633e7c.png)
+![simulator screen shot - iphone 8 - 2018-03-14 at 22 51 29](https://user-images.githubusercontent.com/17814417/37446485-744ce504-27da-11e8-928e-2bdfc173f2ad.png)
 
 
 Clicking on a cell will transition into a more detailed view of it, using the HERO library. For example :
@@ -52,7 +52,10 @@ It is very straightforward and allows you to input all the information.
 
 Lastly, the app is tab based once you log in. The first tab is the feed which was shown above. The other tab is simply a list very similar to the feed, of events you created or are interested in.
 
-![simulator screen shot - iphone 8 - 2018-03-03 at 22 39 12](https://user-images.githubusercontent.com/17814417/36942955-c94bd0d2-1f34-11e8-98d6-37a8a0217f37.png)
+![simulator screen shot - iphone 8 - 2018-03-14 at 22 51 32](https://user-images.githubusercontent.com/17814417/37446492-7a22aca2-27da-11e8-85ad-d91f4ac375b0.png)
+
+
+You can un-RSVP from any of the events. Events in your feed are sorted by date and old ones are discarded.
 
 
 # Libraries used
@@ -64,6 +67,7 @@ Lastly, the app is tab based once you log in. The first tab is the feed which wa
 * ObjectMapper
 * Spring
 * HERO
+* SwiftyBeaver
 
 # APIS used
 
