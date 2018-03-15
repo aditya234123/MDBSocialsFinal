@@ -111,12 +111,13 @@ class DetailViewController: UIViewController {
         starImage = UIButton(frame: CGRect(x: view.frame.width - 80, y: view.frame.height - 110, width: 30, height: 30))
         if (post?.userInterested!)! {
             starImage.setImage(star2, for: .normal)
-            starImage.isEnabled = false
+            starImage.setImage(star, for: .highlighted)
         } else {
             starImage.setImage(star, for: .normal)
             starImage.setImage(star2, for: .highlighted)
-            starImage.addTarget(self, action: #selector(starSelected), for: .touchUpInside)
         }
+        starImage.addTarget(self, action: #selector(starSelected), for: .touchUpInside)
+
         view.addSubview(starImage)
         
         RSVP = UILabel(frame: CGRect(x: view.frame.width - 45, y: view.frame.height - 110, width: 40, height: 30))
@@ -127,14 +128,25 @@ class DetailViewController: UIViewController {
     }
     
     @objc func starSelected() {
+        print("star selected")
+        let star = UIImage(named: "star")
         let star2 = UIImage(named: "star2")
-        starImage.setImage(star2, for: .normal)
-        starImage.isEnabled = false
-        let rsvpIncr = (post?.RSVP)! + 1
-        RSVP.text = "\(rsvpIncr)"
-        
-        FirebaseAPIClient.eventRSVP(postID: (post?.id)!, user: currentUser!)
-        
+        if (post?.userInterested)! {
+            print("a")
+            starImage.setImage(star, for: .normal)
+            starImage.setImage(star2, for: .highlighted)
+            let rsvpIncr = (post?.RSVP)! - 1
+            RSVP.text = "\(rsvpIncr)"
+            FirebaseAPIClient.eventRSVP(postID: (post?.id)!, val: -1, user: currentUser!)
+        } else {
+            print("b")
+            starImage.setImage(star2, for: .normal)
+            starImage.setImage(star, for: .highlighted)
+            let rsvpIncr = (post?.RSVP)! + 1
+            RSVP.text = "\(rsvpIncr)"
+            FirebaseAPIClient.eventRSVP(postID: (post?.id)!, val: 1, user: currentUser!)
+        }
+        post?.userInterested = !(post?.userInterested)!
     }
 
 }

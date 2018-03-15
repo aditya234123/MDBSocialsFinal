@@ -124,23 +124,20 @@ class FirebaseAPIClient {
         }
     }
     
-    static func fetchRSVPChange(postID: String) -> Promise<Int> {
-        return Promise {
-            fulfill, reject in
+    static func fetchRSVPChange(postID: String, withBlock: @escaping (Int) -> ()) {
             let ref = Database.database().reference()
             ref.child("Posts").child(postID).observe(.childChanged, with: { (snapshot) in
-                fulfill(snapshot.value as! Int)
+                withBlock(snapshot.value as! Int)
             })
-        }
     }
     
-    static func eventRSVP(postID: String, user: UserModel) {
+    static func eventRSVP(postID: String, val: Int, user: UserModel) {
         let ref = Database.database().reference()
         ref.child("Posts").child(postID).runTransactionBlock({ (currentData:MutableData) -> TransactionResult in
             if var post = currentData.value as? [String: AnyObject] {
                 
                 var rsvpCount = post["RSVP"] as? Int ?? 0
-                rsvpCount += 1
+                rsvpCount += val
                 post["RSVP"] = rsvpCount as AnyObject?
                 currentData.value = post
                 
@@ -148,10 +145,21 @@ class FirebaseAPIClient {
             }
             return TransactionResult.abort()
         })
-        ref.child("Interested").child(postID).child(user.id!).setValue(user.name!)
-        let otherChanges = [""] as [String]
-        let moreChildUpdates = ["/Users/" + user.id! + "/Interested/" + "\(postID)": otherChanges]
-        ref.updateChildValues(moreChildUpdates)
+        if val == 1 {
+            ref.child("Interested").child(postID).child(user.id!).setValue(user.name!)
+            let otherChanges = [""] as [String]
+            let moreChildUpdates = ["/Users/" + user.id! + "/Interested/" + "\(postID)": otherChanges]
+            ref.updateChildValues(moreChildUpdates)
+        } else {
+            //remove
+            ref.child("Interested").child(postID).child(user.id!).removeValue(completionBlock: {
+                error, _ in
+                print(error)
+            })
+            ref.child("Users").child(user.id!).child("Interested").child(postID).removeValue(completionBlock: { (error, _) in
+                print(error)
+            })
+        }
     }
     
     

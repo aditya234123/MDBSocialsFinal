@@ -23,7 +23,6 @@ class MyEventsViewController: UIViewController {
     
     override func viewDidLoad() {
          NotificationCenter.default.addObserver(self, selector: #selector(openModal), name: .modal, object: nil)
-        getCurrentUserAndPosts()
         setUpNavBar()
         super.viewDidLoad()
         setUpCollectionView()
@@ -31,6 +30,7 @@ class MyEventsViewController: UIViewController {
     
     override func viewDidAppear(_ animated: Bool) {
         self.tabBarController?.tabBar.isHidden = false
+        getCurrentUserAndPosts()
     }
     
     @objc func openModal(_ notification: Notification) {
@@ -60,6 +60,8 @@ class MyEventsViewController: UIViewController {
     }
     
     func getMyInterestedPosts() {
+        self.interestedPosts = [Post]()
+        self.interestedPostIDs = [String]()
         FirebaseAPIClient.getUserInterests(userID: (currentUser?.id!)!).then { (ids) -> Void in
             
             let group = DispatchGroup()

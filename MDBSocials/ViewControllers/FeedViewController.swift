@@ -286,18 +286,30 @@ extension FeedViewController: UICollectionViewDelegate, UICollectionViewDataSour
                     cell.RSVP.hero.id = "RSVP" + "\(indexPath.item)"
                     cell.starImageView.hero.id = "star" + "\(indexPath.item)"
                 }
-            }.then {
-                FirebaseAPIClient.fetchRSVPChange(postID: post.id!)
-            }.then { num -> Void in
-                DispatchQueue.main.async {
-                    post.RSVP = num
-                    cell.RSVP.setTitle("\(post.RSVP!)", for: .normal)
+            }
+        FirebaseAPIClient.fetchRSVPChange(postID: post.id!) { (num) in
+            print(num)
+            DispatchQueue.main.async {
+                print(post.RSVP!)
+                print(num)
+                if post.RSVP! < num {
+                    print("user liked")
                     post.userInterested = true
                     let image = UIImage(named: "star2")
                     cell.starImageView.image = image
                 }
+                else if post.RSVP! > num {
+                     print("user disliked")
+                    post.userInterested = false
+                    let image = UIImage(named: "star")
+                    cell.starImageView.image = image
+                }
+                post.RSVP = num
+                cell.RSVP.setTitle("\(post.RSVP!)", for: .normal)
             }
-            return cell
+        }
+        
+        return cell
         }
         
         func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
