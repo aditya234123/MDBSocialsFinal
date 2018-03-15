@@ -16,6 +16,8 @@ target 'MDBSocials' do
     pod 'SwiftyJSON'
     pod 'ObjectMapper', '~> 3.1'
     pod "PromiseKit", "~> 4.0”
+    pod 'SwiftyBeaver'
+
 
 
   target 'MDBSocialsTests' do

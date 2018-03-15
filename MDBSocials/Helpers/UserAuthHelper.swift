@@ -23,14 +23,13 @@ class UserAuthHelper {
     }
     
     static func logOut(withBlock: @escaping ()->()) {
-        print("logging out")
-        //TODO: Log out using Firebase!
+        log.info("Logged out")
         let firebaseAuth = Auth.auth()
         do {
             try firebaseAuth.signOut()
             withBlock()
         } catch let signOutError as NSError {
-            print ("Error signing out: %@", signOutError)
+            log.warning("Error logging out.")
         }
     }
     

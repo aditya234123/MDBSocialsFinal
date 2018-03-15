@@ -8,6 +8,9 @@
 
 import UIKit
 import Firebase
+import SwiftyBeaver
+
+let log = SwiftyBeaver.self
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -19,6 +22,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Override point for customization after application launch.
         FirebaseApp.configure()
         UIApplication.shared.statusBarStyle = .lightContent
+        
+        let cloud = SBPlatformDestination(appID: "dGP5nN", appSecret: "1Zadwwnp4uljtG8z945rjxzsonPpz1u0", encryptionKey: "1odUr9ubxzfY2vnawyhqqMv4vKiitt9m") // to cloud
+
+        log.addDestination(cloud)
+        log.info("App Started")
+        
         return true
     }
     

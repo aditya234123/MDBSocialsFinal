@@ -66,6 +66,7 @@ PODS:
   - PromiseKit/UIKit (4.5.2):
     - PromiseKit/CorePromise
   - Spring (1.0.5)
+  - SwiftyBeaver (1.5.1)
   - SwiftyJSON (4.0.0)
 
 DEPENDENCIES:
@@ -78,6 +79,7 @@ DEPENDENCIES:
   - ObjectMapper (~> 3.1)
   - PromiseKit (~> 4.0)
   - Spring (from `https://github.com/MengTo/Spring.git`)
+  - SwiftyBeaver
   - SwiftyJSON
 
 EXTERNAL SOURCES:
@@ -107,8 +109,9 @@ SPEC CHECKSUMS:
   ObjectMapper: 20505058f54e5c3ca69e1d6de9897d152a5369a6
   PromiseKit: 743e497a5f505a470d3bbbf4ce0663c1268af0a4
   Spring: 48aad470f3ead043b2da98b64e0bf0630b7ebc42
+  SwiftyBeaver: 4f74563624b2c1e821c522c54142b5dd5ebb0f30
   SwiftyJSON: 070dabdcb1beb81b247c65ffa3a79dbbfb3b48aa
 
-PODFILE CHECKSUM: c7362a96c65e6798dea78adbd23659d636fe4609
+PODFILE CHECKSUM: 254052c95680fc37d44186f5f246568077c3f994
 
 COCOAPODS: 1.1.1

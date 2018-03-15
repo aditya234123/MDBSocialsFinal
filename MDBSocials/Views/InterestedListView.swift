@@ -31,7 +31,7 @@ class InterestedListView: UIView {
     }
 
     func fetchInterested() {
-        FirebaseAPIClient.fetchInterested(postID: self.postID!, names: true).then { arr in
+        FirebaseAPIClient.fetchInterested(postID: self.postID!, names: true).then { arr -> Void in
             self.names = arr
         }.then {
             FirebaseAPIClient.fetchInterested(postID: self.postID!, names: false)

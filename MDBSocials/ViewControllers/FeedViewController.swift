@@ -22,6 +22,7 @@ class FeedViewController: UIViewController {
     var currentUser: UserModel?
     
     override func viewDidLoad() {
+        NotificationCenter.default.addObserver(self, selector: #selector(openModal), name: .modal, object: nil)
         setUpTabBar()
         setUpNavBar()
         getCurrentUser()
@@ -33,6 +34,20 @@ class FeedViewController: UIViewController {
     }
     override func viewDidAppear(_ animated: Bool) {
         self.tabBarController?.tabBar.isHidden = false
+    }
+    
+    @objc func openModal(_ notification: Notification) {
+
+        if self.tabBarController?.selectedIndex == 0 {
+        print("feed")
+        let dict = notification.userInfo as! [String : String]
+        let id = dict["id"]
+        let list = InterestedListView(frame: CGRect(x: 50, y: 50, width: view.frame.width - 100, height: view.frame.height - 100), id: id!)
+        let modalView = AKModalView(view: list)
+        modalView.dismissAnimation = .FadeOut
+        self.navigationController?.view.addSubview(modalView)
+        modalView.show()
+        }
     }
     
     func setUpTabBar() {
@@ -54,12 +69,12 @@ class FeedViewController: UIViewController {
     
     func getPosts() {
         
+        log.verbose("Getting posts for feed.")
         FirebaseAPIClient.fetchAllPosts().then { posts -> Void in
             let currentDate = Date.init()
             let dateFormatter = DateFormatter()
             dateFormatter.dateStyle = DateFormatter.Style.medium
             dateFormatter.timeStyle = DateFormatter.Style.short
-            //let currentDateStr = dateFormatter.string(from: currentDate)
             for post in posts {
                 let pDate = dateFormatter.date(from: post.date!)
                 if pDate! >= currentDate {
@@ -80,7 +95,7 @@ class FeedViewController: UIViewController {
             }.then { _ -> Void in
                 FirebaseAPIClient.fetchNewPosts(withBlock: { (p) in
                     if (!self.postIDs.contains(p.id!)) {
-                        print("Getting new post")
+                        log.info("Getting new post")
                         let dateFormatter = DateFormatter()
                         dateFormatter.dateStyle = DateFormatter.Style.medium
                         dateFormatter.timeStyle = DateFormatter.Style.short
@@ -185,7 +200,6 @@ extension FeedViewController: UICollectionViewDelegate, UICollectionViewDataSour
             x.removeFromSuperview()
         }
         cell.awakeFromNib()
-        cell.delegate = self
         let post = posts[indexPath.item]
         
         let request = MKLocalSearchRequest()
@@ -196,7 +210,7 @@ extension FeedViewController: UICollectionViewDelegate, UICollectionViewDataSour
         var epochTime:TimeInterval = 0
         search.start { response, error in
             guard let response = response else {
-                print("There was an error searching for: \(request.naturalLanguageQuery) error: \(error)")
+                log.warning("There was an error searching for: \(request.naturalLanguageQuery) error: \(error)")
                 return
             }
             let first = response.mapItems[0]
@@ -214,24 +228,18 @@ extension FeedViewController: UICollectionViewDelegate, UICollectionViewDataSour
         cell.id = post.id
         StorageHelper.getProfilePic(id: post.id!).then { (image) -> Void in
             post.image = image
-            print("comes 1")
             }.then { _ -> Promise<[String]> in
-                 print("comes 2")
                 return FirebaseAPIClient.fetchInterested(postID: post.id!, names: false)
             }.then { arr -> Promise<Int> in
-                print("comes 3")
-                print(arr)
                 if arr.contains((self.currentUser?.id)!) {
                     post.userInterested = true
                 }
                 return FirebaseAPIClient.fetchRSVP(postID: post.id!)
             }.then { rsvpNum -> Void in
-                 print("comes 4")
                 post.RSVP = rsvpNum
             }.then { _ -> Promise<String> in
                 DarkSkyAPIHelper.findForecast(lat: lat, lon: lon, time: epochTime)
         }.then { (type) -> Void in
-            print(type)
             DispatchQueue.main.async {
                 cell.bgClearIcon.alpha = 0.3
                 cell.bgClearIcon.image = nil
@@ -256,7 +264,6 @@ extension FeedViewController: UICollectionViewDelegate, UICollectionViewDataSour
             }
             weatherIconImage = img
             }.always {
-                 print("comes 5")
                 DispatchQueue.main.async {
                     cell.nameLabel.text = post.personName
                     cell.eventLabel.text = post.eventName
@@ -304,16 +311,5 @@ extension FeedViewController: UICollectionViewDelegate, UICollectionViewDataSour
         }
         
     }
-    
-    extension FeedViewController: feedViewCellDelegate {
-        
-        func addModalView(id: String) {
-            let list = InterestedListView(frame: CGRect(x: 50, y: 50, width: view.frame.width - 100, height: view.frame.height - 100), id: id)
-            let modalView = AKModalView(view: list)
-            modalView.dismissAnimation = .FadeOut
-            self.navigationController?.view.addSubview(modalView)
-            modalView.show()
-        }
-        
-}
+
 

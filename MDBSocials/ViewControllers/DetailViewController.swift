@@ -28,9 +28,12 @@ class DetailViewController: UIViewController {
         super.viewDidLoad()
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        setUpNav()
+    }
+    
     func setUpView() {
         self.hero.isEnabled = true
-        setUpNav()
         setUpImage()
         setUpText()
     }

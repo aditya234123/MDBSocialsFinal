@@ -123,6 +123,7 @@ class LoginViewController: UIViewController {
         }
         UserAuthHelper.logIn(email: emailTextField.text!, password: passwordTextField.text!) { (user, errorInfo) in
             if errorInfo != "" {
+                log.error("Couldn't log in.")
                 let alert = UIAlertController(title: "Can't login ", message: errorInfo, preferredStyle: .alert)
                 let action = UIAlertAction(title: "OK", style: .default, handler: nil)
                 alert.addAction(action)
@@ -131,6 +132,7 @@ class LoginViewController: UIViewController {
                     self.view.endEditing(true)
                 }
             } else {
+                log.info("Logged in.")
                 self.performSegue(withIdentifier: "loggedin", sender: self)
             }
         }

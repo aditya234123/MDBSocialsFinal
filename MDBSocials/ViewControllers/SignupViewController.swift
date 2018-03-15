@@ -111,6 +111,7 @@ class SignupViewController: UIViewController {
         }
         UserAuthHelper.createUser(email: emailTextField.text!, password: passwordTextField.text!) { (user, error) in
             if error != "" {
+                log.error("Couldn't sign up.")
                 let alert = UIAlertController(title: "Can't Sign Up", message: error, preferredStyle: .alert)
                 let action = UIAlertAction(title: "OK", style: .default, handler: nil)
                 alert.addAction(action)
@@ -119,6 +120,7 @@ class SignupViewController: UIViewController {
                     self.view.endEditing(true)
                 }
             } else {
+                log.info("Signed up.")
                 self.dismiss(animated: true, completion: nil)
                 self.presentingViewController?.childViewControllers[0].performSegue(withIdentifier: "loggedin", sender: self)
                 FirebaseAPIClient.createNewUser(id: user!.uid, name: self.nameTextField.text!, email: self.emailTextField.text!, username: self.usernameTextField.text!)

@@ -45,3 +45,7 @@ extension UIViewController {
         self.view.endEditing(true)
     }
 }
+
+extension NSNotification.Name {
+    static let modal = Notification.Name("openModal")
+}

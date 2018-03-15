@@ -83,6 +83,7 @@ class FeedViewCell: UICollectionViewCell {
     
     @objc func labelTapped() {
         delegate?.addModalView(id: self.id!)
+        NotificationCenter.default.post(name: .modal, object: self, userInfo: ["id" : self.id!])
     }
     
     func setUpBG() {

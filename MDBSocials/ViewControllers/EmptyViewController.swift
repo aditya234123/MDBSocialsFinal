@@ -20,10 +20,10 @@ class EmptyViewController: UIViewController {
     func checkLoggedIn() {
         UserAuthHelper.isUserLoggedIn { (bool) in
             if bool {
-                print("logged in")
+                log.info("User logged in already.")
                 self.performSegue(withIdentifier: "doesntNeedLogin", sender: self)
             } else {
-                print("not logged in")
+                log.info("User not logged in.")
                 self.performSegue(withIdentifier: "NeedsLogin", sender: self)
             }
         }

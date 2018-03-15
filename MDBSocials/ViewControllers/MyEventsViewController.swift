@@ -22,6 +22,7 @@ class MyEventsViewController: UIViewController {
     var currentUser: UserModel?
     
     override func viewDidLoad() {
+         NotificationCenter.default.addObserver(self, selector: #selector(openModal), name: .modal, object: nil)
         getCurrentUserAndPosts()
         setUpNavBar()
         super.viewDidLoad()
@@ -32,7 +33,22 @@ class MyEventsViewController: UIViewController {
         self.tabBarController?.tabBar.isHidden = false
     }
     
+    @objc func openModal(_ notification: Notification) {
+        if self.tabBarController?.selectedIndex == 1 {
+            print("yea")
+        let dict = notification.userInfo as! [String : String]
+        let id = dict["id"]
+        let list = InterestedListView(frame: CGRect(x: 50, y: 50, width: view.frame.width - 100, height: view.frame.height - 100), id: id!)
+        let modalView = AKModalView(view: list)
+        modalView.dismissAnimation = .FadeOut
+        self.navigationController?.view.addSubview(modalView)
+        modalView.show()
+        }
+    }
+    
     func getCurrentUserAndPosts() {
+        
+        log.verbose("Getting user and posts for my events.")
         UserAuthHelper.getCurrentUser().then { (user) in
         FirebaseAPIClient.fetchUser(id: user.uid).then {
                 u -> Void in
@@ -136,7 +152,6 @@ extension MyEventsViewController: UICollectionViewDelegate, UICollectionViewData
             x.removeFromSuperview()
         }
         cell.awakeFromNib()
-        cell.delegate = self
         
         let post = interestedPosts[indexPath.item]
         
@@ -148,7 +163,7 @@ extension MyEventsViewController: UICollectionViewDelegate, UICollectionViewData
         var epochTime:TimeInterval = 0
         search.start { response, error in
             guard let response = response else {
-                print("There was an error searching for: \(request.naturalLanguageQuery) error: \(error)")
+                log.warning("There was an error searching for: \(request.naturalLanguageQuery) error: \(error)")
                 return
             }
             let first = response.mapItems[0]
@@ -164,23 +179,18 @@ extension MyEventsViewController: UICollectionViewDelegate, UICollectionViewData
         cell.id = post.id
         StorageHelper.getProfilePic(id: post.id!).then { (image) -> Void in
             post.image = image
-            print("comes 1")
             }.then { _ -> Promise<[String]> in
-                print("comes 2")
                 return FirebaseAPIClient.fetchInterested(postID: post.id!, names: false)
             }.then { arr -> Promise<Int> in
-                print("comes 3")
                 if arr.contains((self.currentUser?.id)!) {
                     post.userInterested = true
                 }
                 return FirebaseAPIClient.fetchRSVP(postID: post.id!)
             }.then { rsvpNum -> Void in
-                print("comes 4")
                 post.RSVP = rsvpNum
             }.then { _ -> Promise<String> in
                 DarkSkyAPIHelper.findForecast(lat: lat, lon: lon, time: epochTime)
             }.then { (type) -> Void in
-                print(type)
                 
                 var img = UIImage()
                 if type == "snow" || type == "sleet" || type == "hail" {
@@ -201,7 +211,6 @@ extension MyEventsViewController: UICollectionViewDelegate, UICollectionViewData
                 }
                 cell.bgClearIcon.image = img
             }.always {
-                print("comes 5")
                 DispatchQueue.main.async {
                     cell.nameLabel.text = post.personName
                     cell.eventLabel.text = post.eventName
@@ -257,17 +266,5 @@ extension MyEventsViewController: UICollectionViewDelegate, UICollectionViewData
         destVC.starImage.hero.id = starHero
     }
 
-}
-
-extension MyEventsViewController: feedViewCellDelegate {
-    func addModalView(id: String) {
-        let list = InterestedListView(frame: CGRect(x: 50, y: 50, width: view.frame.width - 100, height: view.frame.height - 100), id: id)
-        let modalView = AKModalView(view: list)
-        modalView.dismissAnimation = .FadeOut
-        self.navigationController?.view.addSubview(modalView)
-        modalView.show()
-    }
-    
-    
 }
 

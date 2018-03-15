@@ -31,7 +31,7 @@ class MapViewController: UIViewController {
         let search = MKLocalSearch(request: request)
         search.start { response, error in
             guard let response = response else {
-                print("There was an error searching for: \(request.naturalLanguageQuery) error: \(error)")
+                log.warning("There was an error searching for: \(request.naturalLanguageQuery) error: \(error)")
                 return
             }
             let first = response.mapItems[0]

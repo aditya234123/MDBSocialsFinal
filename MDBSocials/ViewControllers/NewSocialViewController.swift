@@ -38,11 +38,6 @@ class NewSocialViewController: UIViewController {
         setUpDate()
         setUpDescription()
         setUpLocation()
-        /*
-        tabBarCover = UIView(frame: CGRect(x: 0, y: view.frame.height - (self.tabBarController?.tabBar.frame.height)!, width: view.frame.width, height: (self.tabBarController?.tabBar.frame.height)!))
-        tabBarCover.backgroundColor = .blue
-        view.addSubview(tabBarCover)
-         */
     }
     
     func setUpNavBar() {
@@ -78,6 +73,7 @@ class NewSocialViewController: UIViewController {
             return StorageHelper.uploadMedia(postID: key, image: self.imageView.image!)
         }.then { _ -> Void in
             self.navigationController?.popViewController(animated: true)
+            log.info("New Post Created.")
         }
     }
     
