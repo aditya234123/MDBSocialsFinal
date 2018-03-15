@@ -154,10 +154,10 @@ class FirebaseAPIClient {
             //remove
             ref.child("Interested").child(postID).child(user.id!).removeValue(completionBlock: {
                 error, _ in
-                print(error)
+                log.warning(error)
             })
             ref.child("Users").child(user.id!).child("Interested").child(postID).removeValue(completionBlock: { (error, _) in
-                print(error)
+                log.warning(error)
             })
         }
     }

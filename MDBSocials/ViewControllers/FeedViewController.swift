@@ -39,7 +39,6 @@ class FeedViewController: UIViewController {
     @objc func openModal(_ notification: Notification) {
 
         if self.tabBarController?.selectedIndex == 0 {
-        print("feed")
         let dict = notification.userInfo as! [String : String]
         let id = dict["id"]
         let list = InterestedListView(frame: CGRect(x: 50, y: 50, width: view.frame.width - 100, height: view.frame.height - 100), id: id!)
@@ -288,18 +287,13 @@ extension FeedViewController: UICollectionViewDelegate, UICollectionViewDataSour
                 }
             }
         FirebaseAPIClient.fetchRSVPChange(postID: post.id!) { (num) in
-            print(num)
             DispatchQueue.main.async {
-                print(post.RSVP!)
-                print(num)
                 if post.RSVP! < num {
-                    print("user liked")
                     post.userInterested = true
                     let image = UIImage(named: "star2")
                     cell.starImageView.image = image
                 }
                 else if post.RSVP! > num {
-                     print("user disliked")
                     post.userInterested = false
                     let image = UIImage(named: "star")
                     cell.starImageView.image = image

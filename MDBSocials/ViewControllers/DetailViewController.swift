@@ -128,18 +128,15 @@ class DetailViewController: UIViewController {
     }
     
     @objc func starSelected() {
-        print("star selected")
         let star = UIImage(named: "star")
         let star2 = UIImage(named: "star2")
         if (post?.userInterested)! {
-            print("a")
             starImage.setImage(star, for: .normal)
             starImage.setImage(star2, for: .highlighted)
             let rsvpIncr = (post?.RSVP)! - 1
             RSVP.text = "\(rsvpIncr)"
             FirebaseAPIClient.eventRSVP(postID: (post?.id)!, val: -1, user: currentUser!)
         } else {
-            print("b")
             starImage.setImage(star2, for: .normal)
             starImage.setImage(star, for: .highlighted)
             let rsvpIncr = (post?.RSVP)! + 1

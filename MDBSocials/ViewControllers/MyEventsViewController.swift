@@ -35,7 +35,6 @@ class MyEventsViewController: UIViewController {
     
     @objc func openModal(_ notification: Notification) {
         if self.tabBarController?.selectedIndex == 1 {
-            print("yea")
         let dict = notification.userInfo as! [String : String]
         let id = dict["id"]
         let list = InterestedListView(frame: CGRect(x: 50, y: 50, width: view.frame.width - 100, height: view.frame.height - 100), id: id!)
